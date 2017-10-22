@@ -1,5 +1,5 @@
 module ComplexPhasePortrait
-using RecipesBase
+using RecipesBase, Plots
 import Images
 import Colors: RGB, HSL
 
@@ -129,38 +129,56 @@ end
 
 ## Recipe for Plots
 
-@userplot PhasePlot
+# @userplot PhasePlot
+#
+# @recipe function f(c::PhasePlot)
+#     if length(c.args) < 3 || !(c.args[1] isa Function)
+#         error("Complex Plot requires a complex function")
+#     end
+#
+#     ff = c.args[1]
+#
+#     xx = if c.args[2] isa AbstractVector
+# 	    	c.args[2]
+#     	elseif c.args[2] isa NTuple{2,Int}
+#     		linspace(c.args[2]..., 500)
+#     	else
+#     		error("Complex plot second argument must give the x limits")
+# 		end
+#     yy = if c.args[3] isa AbstractVector
+# 	    	c.args[3]
+#     	elseif c.args[3] isa NTuple{2,Int}
+#     		linspace(c.args[3]..., 500)
+#     	else
+#     		error("Complex plot tihrtd argument must give the y limits")
+# 		end
+#
+#
+#
+#     zz = xx' .+ im.*yy
+#
+#     xlims := (first(xx),last(xx))
+#     ylims := (first(yy),last(yy))
+#     yflip := false
+#
+#     @series portrait(Matrix{Complex128}(ff.(zz)))
+# end
 
-@recipe function f(c::PhasePlot)
-    if length(c.args) < 3 || !(c.args[1] isa Function) 
-        error("Complex Plot requires a complex function")
-    end
-    
-    ff = c.args[1]
-    
-    xx = if c.args[2] isa AbstractVector
-	    	c.args[2]
-    	elseif c.args[2] isa NTuple{2,Int}
-    		linspace(c.args[2]..., 500)
-    	else
-    		error("Complex plot second argument must give the x limits")
-		end
-    yy = if c.args[3] isa AbstractVector
-	    	c.args[3]
-    	elseif c.args[3] isa NTuple{2,Int}
-    		linspace(c.args[3]..., 500)
-    	else
-    		error("Complex plot tihrtd argument must give the y limits")
-		end		
-  
-    
 
+function phaseplot(f, xx::AbstractVector, yy::AbstractVector; kwds...)
     zz = xx' .+ im.*yy
-    
-    xlims := (first(xx),last(xx))
-    ylims := (first(yy),last(yy))
-    
-    @series portrait(Matrix{Complex128}(ff.(zz)))
+
+    plt = plot(portrait(Matrix{Complex128}(f.(zz)));
+                xlims=(first(xx),last(xx)),
+                ylims=(first(yy),last(yy)), kwds...)
+    plt.subplots[1][:yaxis][:flip] = false
+    plt
 end
+
+phaseplot(f, xx::NTuple{2,Int}, yy::NTuple{2,Int}; kwds...) =
+    phaseplot(f, linspace(xx..., 500), linspace(yy..., 500); kwds...)
+
+
+
 
 end # module
