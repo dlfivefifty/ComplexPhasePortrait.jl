@@ -167,8 +167,9 @@ end
 
 function phaseplot(f, xx::AbstractVector, yy::AbstractVector; kwds...)
     zz = xx' .+ im.*yy
+    F = f.(zz)[end:-1:1, :]
 
-    plt = plot(portrait(Matrix{Complex128}(f.(zz)));
+    plt = plot(portrait(Matrix{Complex128}(F));
                 xlims=(first(xx),last(xx)),
                 ylims=(first(yy),last(yy)), kwds...)
     plt.subplots[1][:yaxis][:flip] = false
